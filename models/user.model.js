@@ -15,15 +15,12 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true,
         unique: true,
         lowercase: true,
-        validate: {
-            validator: function (v) {
-                return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v);
-            },
-            message: props => `${props.value} is not a valid email address!`,
-        }
+        
+    },
+    phoneNumber: {
+        type: String
     },
     password: {
         type: String,
@@ -40,7 +37,7 @@ const userSchema = new mongoose.Schema({
         timestamps: true
     })
 
-    const userModel = mongoose.model('User', userSchema);
+const userModel = mongoose.model('User', userSchema);
 
 module.exports = {
     userModel
