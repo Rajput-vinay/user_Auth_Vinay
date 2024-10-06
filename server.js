@@ -1,6 +1,7 @@
 const express = require('express');
 const { dbConnect } = require('./database/db');
 const {userRouter} = require("./routes/user.route")
+const cookieParser = require('cookie-parser')
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -12,7 +13,7 @@ dbConnect();
 
 // Middleware to parse JSON requests
 app.use(express.json());
-
+app.use(cookieParser())
 
 //  user Routes
 app.use('/api/v1',userRouter)

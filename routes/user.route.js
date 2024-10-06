@@ -2,6 +2,7 @@ const { Router } = require('express');
 const { userModel } = require('../models/user.model');
 const bcryptjs = require('bcryptjs');
 const Joi = require('joi');
+const jwt = require('jsonwebtoken');
 const userRouter = Router();
 
 
@@ -57,6 +58,73 @@ userRouter.post('/register', async (req, res) => {
         });
     }
 });
+
+const loginSchema = Joi.object({
+    email: Joi.string()
+        .pattern(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/) // Regex for email validation
+        .optional(),
+    phoneNumber: Joi.string()
+        .pattern(/^[0-9]{10}$/) // Regex for phone number validation
+        .optional(),
+    password: Joi.string().min(6).required(),
+}).or('email', 'phoneNumber')
+
+
+userRouter.post('/login',async(req,res) =>{
+    const {error} = loginSchema.validate(req.body)
+
+    if(error){
+        return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const {email, phoneNumber,password} = req.body
+    try {
+        const user = await userModel.findOne({
+            $or: [{ email }, { phoneNumber }] 
+        })
+
+        if(!user){
+            return res.status(400).json({
+                message: "invalid email/ phone or password"
+            })
+        }
+
+        const isPasswordValid = await bcryptjs.compare(password,user.password)
+        
+        if(!isPasswordValid){
+            return res.status(400).json({
+                message:"Invalid email/phone number or password"
+            })
+        }
+
+        const token = jwt.sign(
+            {id:user._id},
+            process.env.JWT_SECRET,
+            {
+                expiresIn:'1h'
+            }
+        )
+
+        res.cookie('token',token,{httpOnly:true})
+
+        res.status(200).json({
+           message: "Login successful",
+//  not pass direct user because not want to send password in response
+           user:{
+            id:user._id,
+            name:user.name,
+            email:user.email,
+            phoneNumber:user.phoneNumber,
+           },
+           token
+        })
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error",
+            error: error.message
+        });
+    }
+})
 
 
 
