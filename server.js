@@ -5,7 +5,8 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const passport = require('passport');  // Import passport
 const dotenv = require('dotenv');
-const {googleAuthRouter} = require('./routes/googleAuthRouter')
+const {googleAuthRouter} = require('./routes/googleAuthRouter');
+const { userMiddelwares } = require('./middlewares/userMiddelwares');
 // Load environment variables from .env file
 dotenv.config();
 
@@ -36,7 +37,8 @@ app.use(passport.session());
 // User Routes
 app.use('/users/api/v1', userRouter);
 app.use('/auth', googleAuthRouter)
-// Start the server
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

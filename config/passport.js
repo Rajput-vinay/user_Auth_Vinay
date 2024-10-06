@@ -1,28 +1,26 @@
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const { userModel } = require('../models/user.model'); // Ensure this path is correct
+const mongoose = require('mongoose');
+const {userModel} = require('../models/user.model');
 
 module.exports = function(passport) {
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "/users/api/v1/google/callback"
+        callbackURL:  "/auth/google/callback"
     }, async (accessToken, refreshToken, profile, done) => {
         const newUser = {
             googleId: profile.id,
             displayName: profile.displayName,
             firstName: profile.name.givenName,
             lastName: profile.name.familyName,
-            image: profile._json.picture // Use _json to access the raw profile data
+            image: profile.picture
         };
 
         try {
-            // Check if user already exists
             let user = await userModel.findOne({ googleId: profile.id });
             if (user) {
-                // User exists, return the user
                 done(null, user);
             } else {
-                // Create a new user
                 user = await new userModel(newUser).save();
                 done(null, user);
             }
@@ -33,16 +31,13 @@ module.exports = function(passport) {
     }));
 
     passport.serializeUser((user, done) => {
-        done(null, user.id); 
+        done(null, user.id);
     });
 
-    passport.deserializeUser(async (id, done) => {
-        try {
-            const user = await userModel.findById(id);
-            done(null, user); 
-        } catch (err) {
-            console.error(err);
-            done(err, null); 
-        }
+    passport.deserializeUser((id, done) => {
+        userModel.findById(id)
+            .then(user => {
+                done(null, user);
+            });
     });
 };
