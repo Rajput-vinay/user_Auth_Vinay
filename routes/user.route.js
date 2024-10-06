@@ -3,6 +3,7 @@ const { userModel } = require('../models/user.model');
 const bcryptjs = require('bcryptjs');
 const Joi = require('joi');
 const jwt = require('jsonwebtoken');
+const { userMiddelwares } = require('../middlewares/userMiddelwares');
 const userRouter = Router();
 
 
@@ -127,7 +128,15 @@ userRouter.post('/login',async(req,res) =>{
 })
 
 
-userRouter.post('/logout', (req,res)=>{
+userRouter.post('/logout', userMiddelwares,(req,res)=>{
+    const userId = req.user
+
+    if(!userId){
+        return res.status(400).json({
+            message:"user not login"
+        })
+    }
+    
     res.cookie('token','', {expires :new Date(0), httpOnly:true})
           res.status(200).json({
             message:"logout successful"
