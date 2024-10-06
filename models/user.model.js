@@ -30,7 +30,11 @@ const userSchema = new mongoose.Schema({
     profile: {
         type: String,
         default: "",
-    }
+    },
+    googleId: { 
+        type: String, 
+        unique: true,
+         sparse: true }, 
 },
 
     {

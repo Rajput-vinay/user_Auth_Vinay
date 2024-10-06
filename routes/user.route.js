@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const { userMiddelwares } = require('../middlewares/userMiddelwares');
 const { generateOtp } = require('../services/otp.service');
 const { sendOtpEmail } = require('../services/email.services');
+const { googleAuthRouter } = require('./googleAuthRouter');
 const userRouter = Router();
 
 const userSchema = Joi.object({
@@ -134,7 +135,7 @@ userRouter.post('/forgotPassword', async (req, res) => {
     }
 });
 
-userRouter.post('/resetPassword', async (req, res) => {
+userRouter.post('/resetPassword',userMiddelwares,async (req, res) => {
     const { email, otp, newPassword } = req.body;
 
     if (otpStorage.get(email) === otp) {
@@ -151,5 +152,10 @@ userRouter.post('/resetPassword', async (req, res) => {
         res.status(400).json({ message: "Invalid OTP." });
     }
 });
+
+
+
+
+
 
 module.exports = { userRouter };
