@@ -4,6 +4,8 @@ const bcryptjs = require('bcryptjs');
 const Joi = require('joi');
 const jwt = require('jsonwebtoken');
 const { userMiddelwares } = require('../middlewares/userMiddelwares');
+const { generateOtp } = require('../services/otp.service');
+const { sendOtpEmail } = require('../services/email.services');
 const userRouter = Router();
 
 
@@ -141,6 +143,28 @@ userRouter.post('/logout', userMiddelwares,(req,res)=>{
           res.status(200).json({
             message:"logout successful"
           })
+})
+
+
+let otpStorage = {}
+userRouter.post('/forgotPassword', async(req,res) =>{
+    const { email } = req.body;
+
+    try {
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.status(400).json({ message: "User with this email does not exist." });
+        }
+
+        const otp = generateOtp();
+        otpStorage[email] = otp; // Store OTP temporarily
+
+        await sendOtpEmail(email, otp); // Send OTP via email
+        res.status(200).json({ message: `OTP sent to your email. ${otp}` });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
 })
 
 
