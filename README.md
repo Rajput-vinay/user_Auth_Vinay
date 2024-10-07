@@ -1,8 +1,8 @@
-# Google OAuth Authentication with Node.js
+# Authentication Assignments with Node.js and Google Auth
 
 ## Overview
 
-This project demonstrates how to implement Google OAuth authentication in a Node.js application using Passport.js. Users can register, log in, and log out using their Google accounts.
+This project demonstrates how to implement auth and  Google OAuth authentication in a Node.js application using Passport.js. Users can register, log in, and log out using their Google accounts as well as manula.
 
 ## Features
 
